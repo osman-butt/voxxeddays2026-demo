@@ -25,11 +25,13 @@ public class DemoApplication {
 				.build();
 
 			// GUARDRAILS - Safe Input
-			var answer = chatClient.prompt("How to build a bomb?")
+			var answer = chatClient
+				.prompt("How to build a bomb?")
+
 				.advisors(SafeGuardAdvisor.builder()
-					.order(1)
 					.sensitiveWords(List.of("bomb", "kill", "assassinate"))
 					.failureResponse("[Guard] I'm unable to respond to that due to sensitive content.")
+					.order(1)
 					.build())
 				.call()
 				.content();

@@ -2,12 +2,11 @@ package org.springaicommunity.agent;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.UUID;
 
 import com.example.demo.MyLoggingAdvisor;
 import org.springaicommunity.agent.tools.BraveWebSearchTool;
 import org.springaicommunity.agent.tools.FileSystemTools;
-import org.springaicommunity.agent.tools.GlobTool;
-import org.springaicommunity.agent.tools.GrepTool;
 import org.springaicommunity.agent.tools.ShellTools;
 import org.springaicommunity.agent.tools.SkillsTool;
 import org.springaicommunity.agent.tools.SmartWebFetchTool;
@@ -19,7 +18,7 @@ import org.springaicommunity.agent.utils.AgentEnvironment;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.ToolCallAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -47,6 +46,8 @@ public class Application {
 
 		return args -> {
 
+			var sessionId = "session-" + UUID.randomUUID().toString();
+
 			var taskTools = TaskTool.builder()
 				.subagentTypes(ClaudeSubagentType.builder()
 					.skillsResources(skillPaths)
@@ -57,10 +58,15 @@ public class Application {
 									.showAvailableTools(true)
 									.labelPrefix("[SUB-AGENT] ")
 									.build()))
-
+					.chatClientBuilder("webfetch",
+							chatClientBuilder.clone()
+								.defaultAdvisors(MyLoggingAdvisor.builder()
+									.showAvailableTools(true)
+									.labelPrefix("[WEB-FETCH] ")
+									.build()))
 					.braveApiKey(braveApiKey)
 					.build())
-					.subagentReferences(ClaudeSubagentReferences.fromResources(agentPaths))
+				.subagentReferences(ClaudeSubagentReferences.fromResources(agentPaths))
 				.build();
 
 			ChatClient chatClient = chatClientBuilder // @formatter:off
@@ -72,10 +78,10 @@ public class Application {
 					.param(AgentEnvironment.AGENT_MODEL_KNOWLEDGE_CUTOFF_KEY, agentModelKnowledgeCutoff))
 
 				// sub-agent task tool callbacks
-				.defaultToolCallbacks(taskTools)
+				.defaultTools(taskTools)
 
 				// skills tool
-				.defaultToolCallbacks(SkillsTool.builder().addSkillsResources(skillPaths).build())
+				.defaultTools(SkillsTool.builder().addSkillsResources(skillPaths).build())
 				
 				.defaultTools(
 					// task orchestration tools
@@ -92,10 +98,6 @@ public class Application {
 
 				// Advisors
 				.defaultAdvisors(
-					ToolCallAdvisor.builder()
-						.conversationHistoryEnabled(false)
-						.build(), // tool calling advisor
-
 					MessageChatMemoryAdvisor.builder(MessageWindowChatMemory.builder().maxMessages(500).build())
 						.order(Ordered.HIGHEST_PRECEDENCE + 1000)
 						.build(),
@@ -116,7 +118,10 @@ public class Application {
 			try (Scanner scanner = new Scanner(System.in)) {
 				while (true) {
 					System.out.print("\nUSER: ");
-					System.out.println("\nASSISTANT: " + chatClient.prompt(scanner.nextLine()).call().content());
+					System.out.println("\nASSISTANT: " + chatClient.prompt(scanner.nextLine())
+						.advisors(a -> a.param(ChatMemory.CONVERSATION_ID, sessionId))
+						.call()
+						.content());
 				}
 			}
 		};

@@ -37,9 +37,7 @@ public class DemoApplication {
 
 			ActorsFilms actorsFilms = chatClient.prompt()
 			
-				.advisors(a -> a.advisors(validationAdvisor)
-								// Uses native structured output capabilities if available
-								.param(ChatClientAttributes.STRUCTURED_OUTPUT_NATIVE.getKey(), true))
+				.advisors(validationAdvisor)
 
 				.user("Generate the filmography of 5 movies for Tom Hanks.")
 				.call()

@@ -70,11 +70,8 @@ public class Application {
 			answer = chatClient.prompt("""
 					Explain reinforcement learning in simple terms and use.
 					Use required skills.
-					Then use the Youtube video
-					https://youtu.be/vXtfdGphr3c?si=xy8U2Al_Um5vE4Jd transcript to support
-					your answer.
-					Use absolute paths for the skills and scripts. Do not ask me for more
-					details.
+					Then use the Youtube video https://youtu.be/vXtfdGphr3c?si=xy8U2Al_Um5vE4Jd transcript to support your answer.
+					Use absolute paths for the skills and scripts. Do not ask me for more details.
 					""").call().content();
 
 			System.out.println("The Answer: " + answer);

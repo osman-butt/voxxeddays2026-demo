@@ -34,7 +34,7 @@ public class DemoApplication {
 			var output = chatClient.prompt()
 				.tools(new WeatherTools())
 				.advisors(
-					ToolCallingAdvisor.builder().disableInternalConversationHistory().build(),
+					// ToolCallingAdvisor.builder().disableInternalConversationHistory().build(),
 					MessageChatMemoryAdvisor.builder(MessageWindowChatMemory.builder().build())
 						.order(Ordered.HIGHEST_PRECEDENCE + 1000).build())
 				.advisors(a -> a.param(ChatMemory.CONVERSATION_ID, "session-1234"))

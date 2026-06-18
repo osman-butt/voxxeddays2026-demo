@@ -2,12 +2,12 @@ package com.example.demo;
 
 import java.util.Random;
 
-import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.ollama.OllamaChatModel;
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -23,7 +23,7 @@ public class DemoApplication {
 	}
 
 	@Bean
-	public CommandLineRunner cli(AnthropicChatModel mainChatModel, OllamaChatModel ollamaChatModel) {
+	public CommandLineRunner cli(OpenAiChatModel mainChatModel, OllamaChatModel ollamaChatModel) {
 		return args -> { // @formatter:off
 
 			ChatClient chatClient = ChatClient.builder(mainChatModel)
@@ -31,16 +31,12 @@ public class DemoApplication {
 				.defaultTools(new MyTools())
 				
 				.defaultAdvisors(SelfRefineEvaluationAdvisor.builder()
-					.order(Ordered.HIGHEST_PRECEDENCE + 200)
+					.order(Ordered.HIGHEST_PRECEDENCE + 100)
 					.chatClientBuilder(ChatClient.builder(ollamaChatModel))
 					.maxRepeatAttempts(3)
 					.successRating(4)
 					.build())
 
-				// .defaultAdvisors(ToolCallingAdvisor.builder()
-				// 	.advisorOrder(1)
-				// 	.disableInternalConversationHistory()
-				// 	.build())
 
 				.defaultAdvisors(MessageChatMemoryAdvisor.builder(MessageWindowChatMemory.builder().build())
 					.order(Ordered.HIGHEST_PRECEDENCE + 400) // after tool calling advisor (+300)

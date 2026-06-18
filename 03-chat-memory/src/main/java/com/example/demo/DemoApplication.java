@@ -1,5 +1,7 @@
 package com.example.demo;
 
+import java.util.UUID;
+
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -20,15 +22,15 @@ public class DemoApplication {
 	public CommandLineRunner cli(ChatClient.Builder chatClientBuilder) {
 		return args -> { // @formatter:off
 
-			// CHAT MEMORY
 			var chatMemory = MessageWindowChatMemory.builder().maxMessages(10).build();
 
+			var sessionId = UUID.randomUUID().toString();
+
 			ChatClient chatClient = chatClientBuilder
-				.defaultAdvisors(MyLoggingAdvisor.builder()
-					.showConversationHistory(true)
-					.build())
-				.defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
-				.defaultAdvisors(a -> a.param(ChatMemory.CONVERSATION_ID, "chat_memory_conversation_id"))
+				.defaultAdvisors(MyLoggingAdvisor.builder().showConversationHistory(true).build())
+			
+				.defaultAdvisors(a -> a.advisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+										.param(ChatMemory.CONVERSATION_ID, sessionId))
 				.build();
 			
 			System.out.println("Name introduction: " + chatClient.prompt("My name is Christian Tzolov").call().content());
