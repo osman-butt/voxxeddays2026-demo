@@ -177,7 +177,7 @@ public class SelfRefineEvaluationAdvisor implements CallAdvisor, StreamAdvisor {
 
 		return chatClient.prompt(evaluationPrompt)
 			.call()
-			.entity(EvaluationResponse.class, e -> e.useProviderStructuredOutput().validateSchema());
+			.entity(EvaluationResponse.class, e -> e.validateSchema());
 	}
 
 	private String getPromptQuestion(ChatClientRequest chatClientRequest) {
