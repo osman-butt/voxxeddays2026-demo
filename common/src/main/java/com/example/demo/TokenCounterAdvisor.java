@@ -29,6 +29,10 @@ import org.springframework.core.Ordered;
 
 public class TokenCounterAdvisor implements BaseAdvisor {
 
+	private static final String PURPLE = "\033[38;5;129m";
+
+	private static final String RESET = "\033[0m";
+
 	AtomicInteger totalTokenCouner = new AtomicInteger(0);
 
 	AtomicInteger promptTokenCouner = new AtomicInteger(0);
@@ -56,12 +60,12 @@ public class TokenCounterAdvisor implements BaseAdvisor {
 		promptTokenCouner.addAndGet(usage.getPromptTokens());
 		completionTokenCouner.addAndGet(usage.getCompletionTokens());
 
-		System.out.println("Current TOKENS Total: " + usage.getTotalTokens() + ", Completion: "
-				+ usage.getCompletionTokens() + ", Prompt: " + usage.getPromptTokens());
+		System.out.println(PURPLE + "Current TOKENS Total: " + usage.getTotalTokens() + ", Completion: "
+				+ usage.getCompletionTokens() + ", Prompt: " + usage.getPromptTokens() + RESET);
 
 		System.out.println(
-				"Accumulated TOKENS Total: " + totalTokenCouner.get() + ", Completion: " + completionTokenCouner.get()
-						+ ", Prompt: " + promptTokenCouner.get() + ", Number of requests: " + requestCouner.get());
+				PURPLE + "Accumulated TOKENS Total: " + totalTokenCouner.get() + ", Completion: " + completionTokenCouner.get()
+						+ ", Prompt: " + promptTokenCouner.get() + ", Number of requests: " + requestCouner.get() + RESET);
 
 		return chatClientResponse;
 	}

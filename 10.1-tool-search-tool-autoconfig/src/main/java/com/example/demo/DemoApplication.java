@@ -2,7 +2,6 @@ package com.example.demo;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -49,8 +48,8 @@ public class DemoApplication {
 					Please suggest clothing shops that are open right now in the area.
 
 					Do not make assumptions about the date, time. Use the tools for getting the current time.
-					""").stream().content()
-					.collectList().block().stream().collect(Collectors.joining());
+					""")
+					.call().content();
 
 			System.out.println(answer);
 

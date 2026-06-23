@@ -62,35 +62,7 @@
 		</dependency>
 
 
-		<!-- <dependency>
-			<groupId>org.springaicommunity</groupId>
-			<artifactId>tool-search-tool</artifactId>
-			<version>${tool-search-tool.version}</version>
-		</dependency> -->
-
-		<!-- <dependency>
-			<groupId>org.springaicommunity</groupId>
-			<artifactId>tool-searcher-vectorstore</artifactId>
-			<version>${tool-search-tool.version}</version>
-		</dependency> -->
-
 	</dependencies>
-
-	<!-- <dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.example</groupId>
-				<artifactId>common</artifactId>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.ai</groupId>
-				<artifactId>spring-ai-bom</artifactId>
-				<version>${spring-ai.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement> -->
 
 	<build>
 		<plugins>
