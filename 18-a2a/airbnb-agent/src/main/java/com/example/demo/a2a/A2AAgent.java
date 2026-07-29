@@ -11,7 +11,6 @@ import org.springaicommunity.a2a.server.executor.DefaultAgentExecutor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -55,7 +54,7 @@ public class A2AAgent {
 				Your primary function is to utilize the provided tools to search for Airbnb listings
 				and answer related questions.
 				""")
-				.defaultToolCallbacks(toolCallbackProvider)
+				.defaultTools(toolCallbackProvider)
 				.build();
 
 		return new DefaultAgentExecutor(chatClient, (chat, requestContext) -> {

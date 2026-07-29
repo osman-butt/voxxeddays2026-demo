@@ -80,7 +80,7 @@ public class AirbnbAgent {
 
 		ChatClient chatClient = chatClientBuilder.clone()
 			.defaultSystem(SYSTEM_INSTRUCTION)
-			.defaultToolCallbacks(toolCallbackProvider)
+			.defaultTools(toolCallbackProvider)
 			.build();
 
 		return new DefaultAgentExecutor(chatClient, (chat, requestContext) -> {
