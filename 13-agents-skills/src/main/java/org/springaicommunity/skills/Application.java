@@ -27,7 +27,8 @@ public class Application {
 
 	@Bean
 	CommandLineRunner commandLineRunner(ChatClient.Builder chatClientBuilder,
-			@Value("${agent.skills.dirs:Unknown}") List<Resource> agentSkillsDirs) throws IOException {
+			@Value("${agent.skills.dirs:Unknown}") List<Resource> agentSkillsDirs,
+			@Value("${BRAVE_API_KEY:#{null}}") String braveApiKey) throws IOException {
 
 		return args -> {
 
@@ -48,7 +49,7 @@ public class Application {
 					SmartWebFetchTool.builder(chatClientBuilder.clone().build()).build(),
 
 					// Brave web search tool
-					BraveWebSearchTool.builder(System.getenv("BRAVE_API_KEY"))
+					BraveWebSearchTool.builder(braveApiKey)
 						.resultCount(15).build()
 				)
 								

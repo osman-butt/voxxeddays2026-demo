@@ -2,7 +2,6 @@ package com.example.demo;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.ToolCallingAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.boot.CommandLineRunner;
@@ -12,10 +11,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 
 @SpringBootApplication
-public class DemoApplication {
+public class ToolMemoryDemoApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
+		SpringApplication.run(ToolMemoryDemoApplication.class, args);
 	}
 
 	@Bean

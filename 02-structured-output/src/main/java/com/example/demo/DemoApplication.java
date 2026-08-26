@@ -11,13 +11,13 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 public class DemoApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
 
-	@Bean
-	public CommandLineRunner cli(ChatClient.Builder chatClientBuilder) {
-		return args -> { // @formatter:off
+    @Bean
+    public CommandLineRunner cli(ChatClient.Builder chatClientBuilder) {
+        return args -> { // @formatter:off
 
 			ChatClient chatClient = chatClientBuilder
 				.defaultAdvisors(MyLoggingAdvisor.builder().build())
@@ -33,11 +33,11 @@ public class DemoApplication {
 				.entity(ActorsFilms.class,
 					// Uses LLM's native structured output capabilities if available
 					// or fall back to Spring AI's generic support
-					e -> e.useProviderStructuredOutput());
+					e -> e.useProviderStructuredOutput().validateSchema());
 
 			System.out.println("Answer: \n" + actorsFilms);
 
 		}; // @formatter:on
-	}
+    }
 
 }

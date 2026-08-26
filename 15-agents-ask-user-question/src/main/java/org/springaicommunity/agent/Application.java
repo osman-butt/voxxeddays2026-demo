@@ -1,5 +1,6 @@
 package org.springaicommunity.agent;
 
+import java.util.Map;
 import java.util.Scanner;
 
 import org.springaicommunity.agent.tools.AskUserQuestionTool;
@@ -18,15 +19,15 @@ import org.springframework.core.Ordered;
 @SpringBootApplication
 public class Application {
 
-	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
 
-	@Bean
-	CommandLineRunner commandLineRunner(ChatClient.Builder chatClientBuilder) {
+    @Bean
+    CommandLineRunner commandLineRunner(ChatClient.Builder chatClientBuilder) {
 
-		return args -> {
-			// @formatter:off
+        return args -> {
+            // @formatter:off
 			ChatClient chatClient = chatClientBuilder
 			
 				// Ask user question tool
@@ -43,19 +44,20 @@ public class Application {
 				.build();
 				// @formatter:on
 
-			// Start the chat loop
-			System.out.println("\nI am your assistant.\n");
+            // Start the chat loop
+            System.out.println("\nI am your assistant.\n");
 
-			try (Scanner scanner = new Scanner(System.in)) {
-				while (true) {
-					System.out.print("\nUSER: ");
-					System.out.println("\nASSISTANT: " + chatClient.prompt(scanner.nextLine())
-						.advisors(a -> a.param(ChatMemory.CONVERSATION_ID, "conversation-id-1234"))
-						.call()
-						.content());
-				}
-			}
-		};
-	}
+            try (Scanner scanner = new Scanner(System.in)) {
+                while (true) {
+                    System.out.print("\nUSER: ");
+                    System.out.println("\nASSISTANT: " + chatClient.prompt(scanner.nextLine())
+                            .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, "conversation-id-1234"))
+                            .toolContext(Map.of("tool", "context"))
+                            .call()
+                            .content());
+                }
+            }
+        };
+    }
 
 }

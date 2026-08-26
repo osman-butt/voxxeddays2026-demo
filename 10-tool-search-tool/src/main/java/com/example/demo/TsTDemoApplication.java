@@ -16,10 +16,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 
 @SpringBootApplication
-public class DemoApplication {
+public class TsTDemoApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
+		SpringApplication.run(TsTDemoApplication.class, args);
 	}
 
 	@Bean

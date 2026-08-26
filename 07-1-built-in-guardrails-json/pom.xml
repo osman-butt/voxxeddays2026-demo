@@ -8,7 +8,7 @@
 		<artifactId>voxxeddays2026-demo</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>071-built-in-guardrails-json</artifactId>
+	<artifactId>07-1-built-in-guardrails-json</artifactId>
 	<name>07.1 - Guardrails: JSON Validation (built-in)</name>
 	<description>Spring AI: guardrails with StructuredOutputValidationAdvisor</description>
 

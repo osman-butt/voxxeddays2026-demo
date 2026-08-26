@@ -1,6 +1,7 @@
 package org.springaicommunity.agent;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import com.example.demo.MyLoggingAdvisor;
@@ -78,6 +79,7 @@ public class Application {
 					System.out.print("\n> USER: ");
 					System.out.println("\n> ASSISTANT: " + chatClient.prompt(scanner.nextLine())
 						.advisors(a -> a.param(ChatMemory.CONVERSATION_ID, "conversation-id-1234"))
+						.toolContext(Map.of("session", "conversation-id-1234"))
 						.call()
 						.content());
 				}

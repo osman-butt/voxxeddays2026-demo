@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
 import reactor.core.publisher.Flux;
 
 import org.springframework.ai.chat.client.ChatClient;
@@ -91,7 +92,12 @@ public class SelfRefineEvaluationAdvisor implements CallAdvisor, StreamAdvisor {
 			PromptTemplate promptTemplate, int considerSuccessRating,
 			BiPredicate<ChatClientRequest, ChatClientResponse> skipEvaluationPredicate) {
 
-		this.chatClient = chatClientBuilder.build();
+		this.chatClient = chatClientBuilder
+				.defaultAdvisors(MyLoggingAdvisor.builder()
+						.labelPrefix("[EVAL] - ")
+						.order(Ordered.HIGHEST_PRECEDENCE + 150)
+						.build())
+				.build();
 		this.evaluationPromptTemplate = promptTemplate;
 		this.advisorOrder = advisorOrder;
 		this.maxRepeatAttempts = maxRepeatAttempts;
@@ -177,7 +183,7 @@ public class SelfRefineEvaluationAdvisor implements CallAdvisor, StreamAdvisor {
 
 		return chatClient.prompt(evaluationPrompt)
 			.call()
-			.entity(EvaluationResponse.class, e -> e.validateSchema());
+			.entity(EvaluationResponse.class, e -> e.validateSchema().useProviderStructuredOutput());
 	}
 
 	private String getPromptQuestion(ChatClientRequest chatClientRequest) {

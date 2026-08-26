@@ -14,10 +14,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 
 @SpringBootApplication
-public class DemoApplication {
+public class LlmJudgeDemoApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
+		SpringApplication.run(LlmJudgeDemoApplication.class, args);
 	}
 
 	@Bean
@@ -32,7 +32,7 @@ public class DemoApplication {
 					.order(Ordered.HIGHEST_PRECEDENCE + 100)
 					.chatClientBuilder(ChatClient.builder(ollamaChatModel))
 					.maxRepeatAttempts(3)
-					.successRating(4)
+					.successRating(3)
 					.build())
 
 				.defaultAdvisors(MyLoggingAdvisor.builder()
