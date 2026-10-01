@@ -22,6 +22,7 @@
 		<spring-ai.version>2.0.1</spring-ai.version>
 		<spring-ai-agent-utils.version>0.12.0</spring-ai-agent-utils.version>
 		<spring-ai-session.version>0.10.0</spring-ai-session.version>
+		<spring-ai-typesafe.version>0.3.0</spring-ai-typesafe.version>
 		<jena.version>5.4.0</jena.version>
 	</properties>
 
@@ -32,6 +33,7 @@
 		<module>03-chat-memory</module>		
 		<module>04-prompt-stuffing</module>
 		<module>05-rag</module>
+		<module>05-1-modular-rag</module>
 		<module>06-guardrails-safe-input</module>
 		<module>07-guardrails-json</module>
 		<module>07-1-built-in-guardrails-json</module>
