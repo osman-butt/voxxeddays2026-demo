@@ -37,6 +37,7 @@
 		<module>06-guardrails-safe-input</module>
 		<module>07-guardrails-json</module>
 		<module>07-1-built-in-guardrails-json</module>
+		<module>07-2-guardrails-jev</module>
 		<module>08-tools</module>
 		<module>09-tools-with-memory</module>
 		<module>10-tool-search-tool</module>
