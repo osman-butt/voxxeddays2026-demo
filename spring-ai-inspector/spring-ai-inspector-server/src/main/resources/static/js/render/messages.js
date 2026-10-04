@@ -1,10 +1,22 @@
-import { esc, prettyMaybeJson } from '../util.js';
+import { esc, fmtNum, isOpen, prettyMaybeJson } from '../util.js';
+
+const hash = (s) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
+
+// System prompts are long and repeat on every call: collapsed to a one-line preview by default.
+// Keyed by content, so the same prompt stays open (or closed) across calls and re-renders.
+export function renderSystemMessage(cls, tags, text, body) {
+	const key = 'sys:' + hash(text);
+	return `<details class="msg system${cls}" data-key="${key}" ${isOpen(key, false) ? 'open' : ''}><summary class="role"><span class="chev">▸</span>system${tags}
+		<span class="sys-preview">${esc(text.replace(/\s+/g, ' ').trim())}</span><span class="sys-size">${fmtNum(text.length)} chars</span></summary>${body}</details>`;
+}
 
 // ---------------------------------------------------------------- generic (Spring AI) message rendering
 export function renderSpringMessage(m, mark) {
 	const role = m.role || 'user';
 	const cls = mark ? ' ' + mark : '';
-	let html = `<div class="msg ${esc(role)}${cls}"><div class="role">${esc(role)}${mark === 'added' ? '<span class="tag added">+ added by advisors</span>' : ''}${mark === 'removed' ? '<span class="tag removed">− removed by advisors</span>' : ''}</div>`;
+	const tags = `${mark === 'added' ? '<span class="tag added">+ added by advisors</span>' : ''}${mark === 'removed' ? '<span class="tag removed">− removed by advisors</span>' : ''}`;
+	if (role === 'system' && m.text) return renderSystemMessage(cls, tags, m.text, `<div class="text">${esc(m.text)}</div>`);
+	let html = `<div class="msg ${esc(role)}${cls}"><div class="role">${esc(role)}${tags}</div>`;
 	if (m.text) html += `<div class="text">${esc(m.text)}</div>`;
 	for (const tc of m.toolCalls || []) {
 		html += `<div class="block tool-use"><div class="block-label">tool call</div><span class="fn">${esc(tc.name)}</span><pre>${prettyMaybeJson(tc.arguments)}</pre></div>`;

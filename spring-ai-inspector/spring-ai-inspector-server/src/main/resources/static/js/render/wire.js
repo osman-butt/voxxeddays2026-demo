@@ -1,4 +1,5 @@
 import { adapterOf, normRequest, normResponse } from '../providers.js';
+import { renderSystemMessage } from './messages.js';
 import { state } from '../state.js';
 import { wireModelKey } from './tokens.js';
 import { esc, fmtMs, fmtNum, highlightJson, isOpen, oneLine, prettyMaybeJson } from '../util.js';
@@ -24,6 +25,10 @@ export function renderBlock(b) {
 }
 
 export function renderWireMessage(role, blocks, extraCls = '', tag = '') {
+	if (role === 'system') {
+		const text = blocks.map((b) => b.text ?? b.label ?? '').join('\n');
+		return renderSystemMessage(extraCls ? ' ' + extraCls : '', tag, text, blocks.map(renderBlock).join(''));
+	}
 	return `<div class="msg ${esc(role)} ${extraCls}"><div class="role">${esc(role)}${tag}</div>${blocks.map(renderBlock).join('')}</div>`;
 }
 
@@ -82,13 +87,15 @@ export function previousConversation(wire) {
 	return null;
 }
 
-// noul answers are probabilities that the statement is true; >= 0.5 is highlighted.
+// noul answers are probabilities that the statement is true. Whether true is good (is_plausible)
+// or bad (is_injection), and the pass threshold, stay in the app: they are not on the wire,
+// so noul answers are shown neutrally, never as pass or fail.
 export const NOUL_HOT = 0.5;
 
-export function probRow(label, p, picked, hot) {
+export function probRow(label, p, picked, neutral = false) {
 	const pct = Math.max(0, Math.min(1, Number(p) || 0)) * 100;
 	return `<div class="prob ${picked ? 'picked' : ''}"><span class="lbl" title="${esc(label)}">${esc(label)}</span>
-		<div class="bar ${hot ? 'hot' : ''}"><span style="width:${pct.toFixed(1)}%"></span></div><span class="val">${(Number(p) || 0).toFixed(2)}</span></div>`;
+		<div class="bar ${neutral ? 'neutral' : ''}"><span style="width:${pct.toFixed(1)}%"></span></div><span class="val">${(Number(p) || 0).toFixed(2)}</span></div>`;
 }
 
 export const criterionText = (c) => typeof c === 'string' ? c : JSON.stringify(c);
@@ -97,17 +104,17 @@ export function renderSystemOneAnswer(a) {
 	if (!a) return '<span class="spinner"></span>';
 	switch (a.type) {
 		case 'noul':
-			return probRow('P(true)', a.noul, false, a.noul >= NOUL_HOT);
+			return probRow('P(true)', a.noul, false, true);
 		case 'score': {
 			const levels = Object.keys(a.probabilities || a.legend || {});
 			const top = String(Math.round(a.score));
 			return `<div class="big">${esc(a.score)} <span style="font-weight:500">· ${esc(criterionText(a.legend?.[top] ?? ''))}</span></div>
-				${levels.map((k) => probRow(`${k} · ${criterionText(a.legend?.[k] ?? '')}`, a.probabilities?.[k], k === top, false)).join('')}
+				${levels.map((k) => probRow(`${k} · ${criterionText(a.legend?.[k] ?? '')}`, a.probabilities?.[k], k === top)).join('')}
 				${a.confidence != null ? `<span class="pill">confidence <b>${Number(a.confidence).toFixed(2)}</b></span>` : ''}`;
 		}
 		case 'choice':
 			return `<div class="big">${esc(a.choice)}</div>
-				${Object.entries(a.probabilities || {}).map(([k, p]) => probRow(k, p, k === a.choice, false)).join('')}
+				${Object.entries(a.probabilities || {}).map(([k, p]) => probRow(k, p, k === a.choice)).join('')}
 				${a.confidence != null ? `<span class="pill">confidence <b>${Number(a.confidence).toFixed(2)}</b></span>` : ''}`;
 		default:
 			return `<pre>${highlightJson(a)}</pre>`;
@@ -144,12 +151,9 @@ export function renderSystemOne(wire, nreq, nresp) {
 export function systemOneHighlights(nresp) {
 	if (!nresp || !nresp.answers) return '';
 	const entries = Object.entries(nresp.answers);
-	const nouls = entries.filter(([, a]) => a.type === 'noul').sort((x, y) => y[1].noul - x[1].noul);
 	let html = '';
-	const hot = nouls.filter(([, a]) => a.noul >= NOUL_HOT);
-	if (hot.length) html += hot.map(([n, a]) => `<span class="pill hot">⚠ ${esc(n)} ${a.noul.toFixed(2)}</span>`).join('');
-	else if (nouls.length) html += `<span class="pill cool">max ${esc(nouls[0][0])} ${nouls[0][1].noul.toFixed(2)}</span>`;
 	for (const [n, a] of entries) {
+		if (a.type === 'noul') html += `<span class="pill">${esc(n)}: <b>${a.noul.toFixed(2)}</b></span>`;
 		if (a.type === 'score') html += `<span class="pill">${esc(n)}: <b>${esc(a.score)}</b></span>`;
 		if (a.type === 'choice') html += `<span class="pill">${esc(n)}: <b>${esc(a.choice)}</b></span>`;
 	}

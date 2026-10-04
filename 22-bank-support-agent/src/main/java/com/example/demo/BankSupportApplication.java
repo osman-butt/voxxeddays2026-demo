@@ -115,7 +115,7 @@ public class BankSupportApplication {
 					.user(query)
 					.advisors(a -> a.param(SessionMemoryAdvisor.SESSION_ID_CONTEXT_KEY, sessionId))
 					.call()
-					.entity(SupportOutput.class, e -> e.useProviderStructuredOutput().validateSchema());
+					.entity(SupportOutput.class);
 
 				System.out.println("\nUSER: " + query + "\n" + result + "\n");
 			}

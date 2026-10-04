@@ -63,7 +63,7 @@ public record Agent<D, O>(String name, String instructions, Class<D> depsType, C
 
 		this.capabilities.forEach(capability -> capability.beforeRequest(spec, deps));
 
-		return spec.call().entity(this.outputType, e -> e.useProviderStructuredOutput().validateSchema());
+		return spec.call().entity(this.outputType);
 	}
 
 	public static <D, O> Builder<D, O> builder(ChatClient.Builder chatClientBuilder, Class<D> depsType,

@@ -12,6 +12,7 @@ import { ADAPTERS, normRequest, normResponse, usageOf } from '../../main/resourc
 import { diffTools, renderCall, renderItems } from '../../main/resources/static/js/render/cards.js';
 import { renderRag } from '../../main/resources/static/js/render/rag.js';
 import { renderMemory } from '../../main/resources/static/js/render/memory.js';
+import { renderSpringMessage } from '../../main/resources/static/js/render/messages.js';
 import { buildSequence, renderSequence } from '../../main/resources/static/js/render/sequence.js';
 import { renderWire } from '../../main/resources/static/js/render/wire.js';
 import { renderTokenPanel, tokensByModel } from '../../main/resources/static/js/render/tokens.js';
@@ -173,10 +174,23 @@ test('typesafe: systemOne requests and answers', () => {
 		JSON.stringify({ model: 'jev-1', answers: { jailbreak: { type: 'noul', noul: 0.99 } }, usage: { input_tokens: 5, output_tokens: 1 } }));
 
 	assert.deepEqual(Object.keys(normRequest(w).questions), ['jailbreak']);
-	assert.match(renderWire(w), /jailbreak 0\.99/);
+	// Whether true is good or bad is not on the wire: noul answers are shown, not judged.
+	const html = renderWire(w);
+	assert.match(html, /<span class="pill">jailbreak: <b>0\.99<\/b><\/span>/);
+	assert.doesNotMatch(html, /hot|⚠/);
 });
 
 // ---------------------------------------------------------------- escaping
+
+test('system prompts fold to a one-line preview and remember being opened', () => {
+	const m = { role: 'system', text: 'You are an interactive CLI tool.\n\nIMPORTANT: be careful.' };
+	const folded = renderSpringMessage(m);
+	assert.match(folded, /^<details class="msg system" data-key="sys:\w+" >/);
+	assert.match(folded, /sys-preview">You are an interactive CLI tool\. IMPORTANT: be careful\.</);
+	state.open.set(folded.match(/data-key="([^"]+)"/)[1], true);
+	assert.match(renderSpringMessage(m, 'added'), /^<details class="msg system added" data-key="sys:\w+" open>/);
+	assert.doesNotMatch(renderSpringMessage({ role: 'user', text: 'hi' }), /<details/);
+});
 
 test('event data is escaped wherever it is rendered', () => {
 	const evil = '"><img src=x onerror=alert(1)>';

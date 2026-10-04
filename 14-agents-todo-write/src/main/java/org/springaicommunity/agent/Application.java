@@ -12,9 +12,12 @@ import org.springaicommunity.agent.tools.TodoWriteTool.Todos.TodoItem;
 import org.springaicommunity.agent.utils.AgentEnvironment;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.session.DefaultSessionService;
+import org.springframework.ai.session.InMemorySessionRepository;
+import org.springframework.ai.session.advisor.SessionMemoryAdvisor;
+import org.springframework.ai.session.compaction.SlidingWindowCompactionStrategy;
+import org.springframework.ai.session.compaction.TurnCountTrigger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -36,7 +39,6 @@ public class Application {
 	// Find the top 10 Tom Hanks movies, then group them in groups of 2, and finally print
 	// the title name in inverted (e.g. last char first). Use TodoWrite to organize your
 	// tasks.
-
 	@Bean
 	CommandLineRunner commandLineRunner(ChatClient.Builder chatClientBuilder,
 			@Value("${BRAVE_API_KEY:#{null}}") String braveApiKey,
@@ -55,7 +57,7 @@ public class Application {
 				.defaultTools(		
 					// Todo management tool
 					TodoWriteTool.builder()
-						// Publish todo update events
+						// (optional) publish todo update events
 						.todoEventHandler(event ->
 							applicationEventPublisher.publishEvent(new TodoUpdateEvent(this, event.todos())))
 						.build(),	
@@ -67,7 +69,13 @@ public class Application {
 				// Advisors
 				.defaultAdvisors(
 					MyLoggingAdvisor.builder().showSystemMessage(true).build(),
-					MessageChatMemoryAdvisor.builder(MessageWindowChatMemory.builder().maxMessages(500).build()) .build())
+					SessionMemoryAdvisor.builder(DefaultSessionService.builder().sessionRepository(InMemorySessionRepository.builder().build()).build())
+						.defaultUserId("alice")
+						.compactionTrigger(new TurnCountTrigger(20))
+						.compactionStrategy(SlidingWindowCompactionStrategy.builder().maxEvents(10).build())
+						.build()
+					// MessageChatMemoryAdvisor.builder(MessageWindowChatMemory.builder().maxMessages(500).build()) .build()
+				)
 				.build();
 				// @formatter:on
 

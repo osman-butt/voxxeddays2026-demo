@@ -52,18 +52,9 @@ public class Application {
 				.subagentTypes(ClaudeSubagentType.builder()
 					.skillsResources(skillPaths)
 					// configuration used by the local Claude subagents
-					.chatClientBuilder("default",
-							chatClientBuilder.clone()
-								.defaultAdvisors(MyLoggingAdvisor.builder()
-									.showAvailableTools(true)
-									.labelPrefix("[SUB-AGENT] ")
-									.build()))
-					.chatClientBuilder("webfetch",
-							chatClientBuilder.clone()
-								.defaultAdvisors(MyLoggingAdvisor.builder()
-									.showAvailableTools(true)
-									.labelPrefix("[WEB-FETCH] ")
-									.build()))
+					.chatClientBuilder("default", chatClientBuilder.clone())
+					.chatClientBuilder("webfetch", chatClientBuilder.clone())
+					// Web search
 					.braveApiKey(braveApiKey)
 					.build())
 				.subagentReferences(ClaudeSubagentReferences.fromResources(agentPaths))
@@ -100,15 +91,7 @@ public class Application {
 				.defaultAdvisors(
 					MessageChatMemoryAdvisor.builder(MessageWindowChatMemory.builder().maxMessages(500).build())
 						.order(Ordered.HIGHEST_PRECEDENCE + 1000)
-						.build(),
-
-
-					MyLoggingAdvisor.builder()
-						.showAvailableTools(true)
-						.labelPrefix("[MAIN] ")
-						.build()) // logging advisor
-
-
+						.build())
 				.build();
 				// @formatter:on
 
