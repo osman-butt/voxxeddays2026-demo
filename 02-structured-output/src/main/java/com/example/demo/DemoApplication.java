@@ -28,7 +28,7 @@ public class DemoApplication {
 			
 			ActorsFilms actorsFilms = chatClient.prompt()
 				.user("Generate the filmography of 5 movies for Tom Hanks.")
-				.call()				
+				.call()
 				// Request the output to be deserialized into the ActorsFilms record
 				// .entity(ActorsFilms.class);
 				.entity(ActorsFilms.class,

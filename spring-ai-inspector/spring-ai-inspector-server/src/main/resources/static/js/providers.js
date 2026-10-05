@@ -21,7 +21,8 @@ export const anthropicBlock = (b) => {
 		case 'tool_use': case 'server_tool_use': return { type: 'tool_use', id: b.id, name: b.name, input: b.input };
 		case 'tool_result': return { type: 'tool_result', id: b.tool_use_id, isError: b.is_error,
 			content: typeof b.content === 'string' ? b.content : (b.content || []).map((x) => x.text ?? JSON.stringify(x)).join('\n') };
-		case 'thinking': return { type: 'thinking', text: b.thinking };
+		case 'thinking': return { type: 'thinking', text: b.thinking, signed: !!b.signature };
+		case 'redacted_thinking': return { type: 'thinking', text: '', redacted: true };
 		case 'image': case 'document': return { type: 'media', label: b.type + ' · ' + (b.source?.media_type || b.source?.type || '') };
 		default: return { type: 'raw', label: b.type, value: b };
 	}

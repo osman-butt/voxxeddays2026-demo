@@ -8,13 +8,13 @@ import { readFileSync } from 'node:fs';
 
 import { state } from '../../main/resources/static/js/state.js';
 import { handle } from '../../main/resources/static/js/model.js';
-import { ADAPTERS, normRequest, normResponse, usageOf } from '../../main/resources/static/js/providers.js';
+import { ADAPTERS, anthropicBlock, normRequest, normResponse, usageOf } from '../../main/resources/static/js/providers.js';
 import { diffTools, renderCall, renderItems } from '../../main/resources/static/js/render/cards.js';
 import { renderRag } from '../../main/resources/static/js/render/rag.js';
 import { renderMemory } from '../../main/resources/static/js/render/memory.js';
 import { renderSpringMessage } from '../../main/resources/static/js/render/messages.js';
 import { buildSequence, renderSequence } from '../../main/resources/static/js/render/sequence.js';
-import { renderWire } from '../../main/resources/static/js/render/wire.js';
+import { noulLeaning, renderBlock, renderWire } from '../../main/resources/static/js/render/wire.js';
 import { renderTokenPanel, tokensByModel } from '../../main/resources/static/js/render/tokens.js';
 
 const fixture = (name) => JSON.parse(readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url)));
@@ -176,7 +176,8 @@ test('typesafe: systemOne requests and answers', () => {
 	assert.deepEqual(Object.keys(normRequest(w).questions), ['jailbreak']);
 	// Whether true is good or bad is not on the wire: noul answers are shown, not judged.
 	const html = renderWire(w);
-	assert.match(html, /<span class="pill">jailbreak: <b>0\.99<\/b><\/span>/);
+	assert.match(html, /<span class="pill">jailbreak: <b>true<\/b> 0\.99<\/span>/);
+	assert.match(html, /<b>true<\/b> · P\(true\)/);
 	assert.doesNotMatch(html, /hot|⚠/);
 });
 
@@ -190,6 +191,20 @@ test('system prompts fold to a one-line preview and remember being opened', () =
 	state.open.set(folded.match(/data-key="([^"]+)"/)[1], true);
 	assert.match(renderSpringMessage(m, 'added'), /^<details class="msg system added" data-key="sys:\w+" open>/);
 	assert.doesNotMatch(renderSpringMessage({ role: 'user', text: 'hi' }), /<details/);
+});
+
+test('noul answers say which way Jev leans, with a band for close calls', () => {
+	assert.deepEqual([0.07, 0.39, 0.4, 0.51, 0.6, 0.61, 0.97].map(noulLeaning),
+		['false', 'false', 'uncertain', 'uncertain', 'uncertain', 'true', 'true']);
+});
+
+test('anthropic: a thinking block without its text says why it is empty', () => {
+	assert.deepEqual(anthropicBlock({ type: 'thinking', thinking: '', signature: 'sig' }), { type: 'thinking', text: '', signed: true });
+	assert.match(renderBlock(anthropicBlock({ type: 'thinking', thinking: '', signature: 'sig' })), /thinking · hidden \(signature only\)/);
+	assert.match(renderBlock(anthropicBlock({ type: 'redacted_thinking', data: 'x' })), /thinking · redacted \(encrypted\)/);
+	const shown = renderBlock(anthropicBlock({ type: 'thinking', thinking: 'Check the units.', signature: 'sig' }));
+	assert.match(shown, /Check the units\./);
+	assert.doesNotMatch(shown, /hidden/);
 });
 
 test('event data is escaped wherever it is rendered', () => {

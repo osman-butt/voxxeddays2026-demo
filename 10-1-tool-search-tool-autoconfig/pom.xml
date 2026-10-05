@@ -24,15 +24,15 @@
 			<version>${spring-ai.version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-starter-model-anthropic</artifactId>
-		</dependency>
-
 		<!-- <dependency>
 			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-starter-model-openai</artifactId>
+			<artifactId>spring-ai-starter-model-anthropic</artifactId>
 		</dependency> -->
+
+		<dependency>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-starter-model-openai</artifactId>
+		</dependency>
 
 		<!-- Spring AI Vector Store for semantic search -->
 		<dependency>
@@ -40,10 +40,10 @@
 			<artifactId>spring-ai-vector-store</artifactId>
 		</dependency>
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-starter-model-transformers</artifactId>
-		</dependency>
+		</dependency> -->
 
 		<dependency>
 			<groupId>org.springframework.ai</groupId>

@@ -15,8 +15,14 @@ export function renderBlock(b) {
 			return `<div class="block tool-use"><div class="block-label">tool call${b.id ? ' · ' + esc(b.id) : ''}</div><span class="fn">${esc(b.name)}</span><pre>${highlightJson(b.input ?? {})}</pre></div>`;
 		case 'tool_result':
 			return `<div class="block tool-result"><div class="block-label">tool result${b.name ? ' · <span class="fn">' + esc(b.name) + '</span>' : ''}${b.id ? ' · ' + esc(b.id) : ''}${b.isError ? ' · error' : ''}</div><pre>${prettyMaybeJson(b.content)}</pre></div>`;
-		case 'thinking':
-			return `<div class="block"><div class="block-label">thinking</div><div class="text">${esc(b.text)}</div></div>`;
+		case 'thinking': {
+			if (b.text) return `<div class="block"><div class="block-label">thinking</div><div class="text">${esc(b.text)}</div></div>`;
+			// Reasoning not returned: the block only carries what the model needs to resume it.
+			const [label, why] = b.redacted ? ['redacted (encrypted)', 'The reasoning was encrypted by the provider and is sent back as is.']
+				: b.signed ? ['hidden (signature only)', 'The reasoning is not returned, only its signature, which is sent back so the model can continue from it.']
+				: ['empty', 'The model returned an empty thinking block.'];
+			return `<div class="block" title="${esc(why)}"><div class="block-label">thinking · ${label}</div></div>`;
+		}
 		case 'media':
 			return `<div class="block"><div class="block-label">media</div>${esc(b.label)}</div>`;
 		default:
@@ -89,12 +95,13 @@ export function previousConversation(wire) {
 
 // noul answers are probabilities that the statement is true. Whether true is good (is_plausible)
 // or bad (is_injection), and the pass threshold, stay in the app: they are not on the wire,
-// so noul answers are shown neutrally, never as pass or fail.
+// so noul answers are shown neutrally, never as pass or fail: only which way Jev leans.
 export const NOUL_HOT = 0.5;
+export const noulLeaning = (p) => p > 0.6 ? 'true' : p < 0.4 ? 'false' : 'uncertain';
 
-export function probRow(label, p, picked, neutral = false) {
+export function probRow(label, p, picked, neutral = false, lead = '') {
 	const pct = Math.max(0, Math.min(1, Number(p) || 0)) * 100;
-	return `<div class="prob ${picked ? 'picked' : ''}"><span class="lbl" title="${esc(label)}">${esc(label)}</span>
+	return `<div class="prob ${picked ? 'picked' : ''}"><span class="lbl" title="${esc(label)}">${lead}${esc(label)}</span>
 		<div class="bar ${neutral ? 'neutral' : ''}"><span style="width:${pct.toFixed(1)}%"></span></div><span class="val">${(Number(p) || 0).toFixed(2)}</span></div>`;
 }
 
@@ -104,7 +111,7 @@ export function renderSystemOneAnswer(a) {
 	if (!a) return '<span class="spinner"></span>';
 	switch (a.type) {
 		case 'noul':
-			return probRow('P(true)', a.noul, false, true);
+			return probRow('P(true)', a.noul, false, true, `<b>${noulLeaning(a.noul)}</b> · `);
 		case 'score': {
 			const levels = Object.keys(a.probabilities || a.legend || {});
 			const top = String(Math.round(a.score));
@@ -153,7 +160,7 @@ export function systemOneHighlights(nresp) {
 	const entries = Object.entries(nresp.answers);
 	let html = '';
 	for (const [n, a] of entries) {
-		if (a.type === 'noul') html += `<span class="pill">${esc(n)}: <b>${a.noul.toFixed(2)}</b></span>`;
+		if (a.type === 'noul') html += `<span class="pill">${esc(n)}: <b>${noulLeaning(a.noul)}</b> ${a.noul.toFixed(2)}</span>`;
 		if (a.type === 'score') html += `<span class="pill">${esc(n)}: <b>${esc(a.score)}</b></span>`;
 		if (a.type === 'choice') html += `<span class="pill">${esc(n)}: <b>${esc(a.choice)}</b></span>`;
 	}

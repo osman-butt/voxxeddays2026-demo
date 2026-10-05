@@ -9,7 +9,6 @@ import org.springaicommunity.typesafe.judge.JevJudge;
 import org.springaicommunity.typesafe.question.Noul;
 import org.springaicommunity.typesafe.question.Score;
 
-import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.boot.CommandLineRunner;
@@ -35,10 +34,10 @@ public class ModelJudgeDemoApplication {
 	}
 
 	@Bean
-	public CommandLineRunner cli(AnthropicChatModel mainChatModel, TypeSafeClient typeSafeClient) {
+	public CommandLineRunner cli(ChatClient.Builder chatClientBuilder, TypeSafeClient typeSafeClient) {
 		return args -> { // @formatter:off
 
-			ChatClient chatClient = ChatClient.builder(mainChatModel)
+			ChatClient chatClient = chatClientBuilder
 
 				.defaultTools(new MyTools())
 
